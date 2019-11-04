@@ -44,7 +44,7 @@ public class FlowQpsDemo {
 
     private static final int threadCount = 32;
 
-    private static int seconds = 60 + 40;
+    private static int seconds =5;
 
     public static void main(String[] args) throws Exception {
         initFlowQpsRule();

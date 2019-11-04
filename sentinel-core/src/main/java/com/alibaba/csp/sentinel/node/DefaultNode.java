@@ -27,10 +27,12 @@ import com.alibaba.csp.sentinel.slots.nodeselector.NodeSelectorSlot;
 
 /**
  * <p>
+ *     持有具体上下文中具体资源的统计节点，维度是上下文*资源
  * A {@link Node} used to hold statistics for specific resource name in the specific context.
  * Each distinct resource in each distinct {@link Context} will corresponding to a {@link DefaultNode}.
  * </p>
  * <p>
+ *     当在同一个上下文中多次调用entry()，这个统计节点会存在多个子节点
  * This class may have a list of sub {@link DefaultNode}s. Child nodes will be created when
  * calling {@link SphU}#entry() or {@link SphO}@entry() multiple times in the same {@link Context}.
  * </p>
@@ -41,16 +43,19 @@ import com.alibaba.csp.sentinel.slots.nodeselector.NodeSelectorSlot;
 public class DefaultNode extends StatisticNode {
 
     /**
+     * 资源
      * The resource associated with the node.
      */
     private ResourceWrapper id;
 
     /**
+     * 子节点列表
      * The list of all child nodes.
      */
     private volatile Set<Node> childList = new HashSet<>();
 
     /**
+     * 关联cluster node
      * Associated cluster node.
      */
     private ClusterNode clusterNode;

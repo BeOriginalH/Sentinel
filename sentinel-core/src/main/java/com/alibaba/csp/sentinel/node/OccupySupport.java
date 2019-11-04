@@ -16,6 +16,7 @@
 package com.alibaba.csp.sentinel.node;
 
 /**
+ * 占用支持接口
  * @author Eric Zhao
  * @since 1.5.0
  */

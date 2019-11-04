@@ -26,6 +26,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * statistic node 保存了三种类型的实时统计指标，是保存了最基本的指标的基础节点
+ * - 秒级别的统计指标
+ * - 分钟秒级别的统计指标
+ * - 线程数量
+ *
  * <p>The statistic node keep three kinds of real-time statistics metrics:</p>
  * <ol>
  * <li>metrics in second level ({@code rollingCounterInSecond})</li>
@@ -34,11 +39,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * </ol>
  *
  * <p>
+ *     sentinel使用滑动窗口来记录和统计实时资源
  * Sentinel use sliding window to record and count the resource statistics in real-time.
  * The sliding window infrastructure behind the {@link ArrayMetric} is {@code LeapArray}.
  * </p>
  *
  * <p>
+ *     当请求第一次过来，sentinel会创建一个新的指定了时间跨度的window bucket来保存运行的数据，
+ *     比如总的响应时间、进入的请求数量、阻塞的请求数量。
  * case 1: When the first request comes in, Sentinel will create a new window bucket of
  * a specified time-span to store running statics, such as total response time(rt),
  * incoming request(QPS), block request(bq), etc. And the time-span is defined by sample count.
@@ -51,6 +59,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 	  request
  * </pre>
  * <p>
+ *
  * Sentinel use the statics of the valid buckets to decide whether this request can be passed.
  * For example, if a rule defines that only 100 requests can be passed,
  * it will sum all qps in valid buckets, and compare it to the threshold defined in rule.
@@ -89,6 +98,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class StatisticNode implements Node {
 
     /**
+     * 持有秒级别的统计数据指标，默认一秒，样本数2
      * Holds statistics of the recent {@code INTERVAL} seconds. The {@code INTERVAL} is divided into time spans
      * by given {@code sampleCount}.
      */
@@ -96,17 +106,20 @@ public class StatisticNode implements Node {
         IntervalProperty.INTERVAL);
 
     /**
+     * 持有分钟级别的数据指标，单位一分钟，样本数量为60，即每秒一个样本
      * Holds statistics of the recent 60 seconds. The windowLengthInMs is deliberately set to 1000 milliseconds,
      * meaning each bucket per second, in this way we can get accurate statistics of each second.
      */
     private transient Metric rollingCounterInMinute = new ArrayMetric(60, 60 * 1000, false);
 
     /**
+     * 线程总数
      * The counter for thread count.
      */
     private LongAdder curThreadNum = new LongAdder();
 
     /**
+     * 最后一次获取到metrics的时间戳
      * The last timestamp when metrics were fetched.
      */
     private long lastFetchTime = -1;

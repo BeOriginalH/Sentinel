@@ -117,8 +117,16 @@ public class ContextUtil {
         return trueEnter(name, origin);
     }
 
+    /**
+     * 创建一个context
+     * @param name 资源名称
+     * @param origin 请求来源
+     * @return
+     */
     protected static Context trueEnter(String name, String origin) {
+        //先从本地线程中获取
         Context context = contextHolder.get();
+        //本地线程中没有
         if (context == null) {
             Map<String, DefaultNode> localCacheNameMap = contextNameNodeMap;
             DefaultNode node = localCacheNameMap.get(name);

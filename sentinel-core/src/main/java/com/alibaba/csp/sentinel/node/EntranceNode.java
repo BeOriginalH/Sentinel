@@ -22,6 +22,7 @@ import com.alibaba.csp.sentinel.slots.nodeselector.NodeSelectorSlot;
 
 /**
  * <p>
+ *     EntranceNode代表调用链入口的节点统计信息，一个上下文对应一个entranceNode，统计的信息是整个上下文中的信息
  * A {@link Node} represents the entrance of the invocation tree.
  * </p>
  * <p>

@@ -40,10 +40,24 @@ import com.alibaba.csp.sentinel.util.TimeUtil;
  */
 public abstract class LeapArray<T> {
 
+    /**
+     * 以毫秒为单位的时间窗口长度
+     */
     protected int windowLengthInMs;
+
+    /**
+     *总的bucket数量
+     */
     protected int sampleCount;
+
+    /**
+     * 以毫秒为单位的时间间隔
+     */
     protected int intervalInMs;
 
+    /**
+     * 采样的时间窗口数组
+     */
     protected final AtomicReferenceArray<WindowWrap<T>> array;
 
     /**
@@ -70,6 +84,7 @@ public abstract class LeapArray<T> {
     }
 
     /**
+     * 获取当前时间的bucket
      * Get the bucket at current timestamp.
      *
      * @return the bucket at current timestamp
@@ -95,12 +110,22 @@ public abstract class LeapArray<T> {
      */
     protected abstract WindowWrap<T> resetWindowTo(WindowWrap<T> windowWrap, long startTime);
 
+    /**
+     * 计算当前时间戳对应的样本数组的坐标
+     * @param timeMillis
+     * @return
+     */
     private int calculateTimeIdx(/*@Valid*/ long timeMillis) {
         long timeId = timeMillis / windowLengthInMs;
         // Calculate current index so we can map the timestamp to the leap array.
         return (int)(timeId % array.length());
     }
 
+    /**
+     * 计算窗口的开始时间
+     * @param timeMillis
+     * @return
+     */
     protected long calculateWindowStart(/*@Valid*/ long timeMillis) {
         return timeMillis - timeMillis % windowLengthInMs;
     }
@@ -128,6 +153,7 @@ public abstract class LeapArray<T> {
          * (3) Bucket is deprecated, then reset current bucket and clean all deprecated buckets.
          */
         while (true) {
+            //获得时间窗口
             WindowWrap<T> old = array.get(idx);
             if (old == null) {
                 /*
@@ -142,6 +168,7 @@ public abstract class LeapArray<T> {
                  * then try to update circular array via a CAS operation. Only one thread can
                  * succeed to update, while other threads yield its time slice.
                  */
+                //创建一个新的时间窗口
                 WindowWrap<T> window = new WindowWrap<T>(windowLengthInMs, windowStart, newEmptyBucket(timeMillis));
                 if (array.compareAndSet(idx, null, window)) {
                     // Successfully updated, return the created bucket.

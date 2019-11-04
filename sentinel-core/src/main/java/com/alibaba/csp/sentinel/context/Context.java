@@ -24,6 +24,9 @@ import com.alibaba.csp.sentinel.node.Node;
 import com.alibaba.csp.sentinel.slots.nodeselector.NodeSelectorSlot;
 
 /**
+ * 这个类持有当前调用的上下文
+ * entranceNode：当前调用链的根节点
+ *
  * This class holds metadata of current invocation:<br/>
  *
  * <ul>

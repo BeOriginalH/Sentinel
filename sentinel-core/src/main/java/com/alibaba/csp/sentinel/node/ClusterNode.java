@@ -23,12 +23,12 @@ import com.alibaba.csp.sentinel.context.ContextUtil;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 
 /**
- * <p>
+ * <p>ClusterNode中保存的是同一个资源汇总的统计信息，不区分上下文
  * This class stores summary runtime statistics of the resource, including rt, thread count, qps
  * and so on. Same resource shares the same {@link ClusterNode} globally, no matter in which
  * {@link com.alibaba.csp.sentinel.context.Context}.
  * </p>
- * <p>
+ * <p>为了区分不同的来源，ClusterNode持有一个originCountMap，保存不同来源的statisticNode
  * To distinguish invocation from different origin (declared in
  * {@link ContextUtil#enter(String name, String origin)}),
  * one {@link ClusterNode} holds an {@link #originCountMap}, this map holds {@link StatisticNode}

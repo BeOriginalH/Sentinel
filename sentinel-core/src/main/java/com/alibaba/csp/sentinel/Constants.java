@@ -54,6 +54,7 @@ public final class Constants {
     public final static String SYSTEM_LOAD_RESOURCE_NAME = "__system_load__";
 
     /**
+     * 代表通用父节点的全局root统计节点
      * Global ROOT statistic node that represents the universal parent node.
      */
     public final static DefaultNode ROOT = new EntranceNode(new StringResourceWrapper(ROOT_ID, EntryType.IN),

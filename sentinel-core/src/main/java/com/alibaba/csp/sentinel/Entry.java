@@ -22,6 +22,14 @@ import com.alibaba.csp.sentinel.slotchain.ResourceWrapper;
 import com.alibaba.csp.sentinel.context.Context;
 
 /**
+ *
+ * 每当调用SphU的entry()方法会返回一个Entry对象，这个对象持有当前调用的一些信息：
+ *
+ * createTime：创建这个Entry的时间，rt统计的时候会被使用到
+ * curNode：当前上下文中的统计节点
+ * originNode：具体的来源统计节点，
+ * ResourcesWrapper：资源
+ *
  * Each {@link SphU}#entry() will return an {@link Entry}. This class holds information of current invocation:<br/>
  *
  * <ul>
@@ -35,6 +43,9 @@ import com.alibaba.csp.sentinel.context.Context;
  * </ul>
  *
  * <p>
+ *     如果在同一个上下文中多次调用SphU#entry()方法，会创建一个调用链。
+ *     这个调用链会由parent和child的entry组成。
+ *     context中总是持有调用链的当前节点，如果调用Entry.exit(),会将修改父节点为当前节点。
  * A invocation tree will be created if we invoke SphU#entry() multi times in the same {@link Context},
  * so parent or child entry may be held by this to form the tree. Since {@link Context} always holds
  * the current entry in the invocation tree, every {@link Entry#exit()} call should modify

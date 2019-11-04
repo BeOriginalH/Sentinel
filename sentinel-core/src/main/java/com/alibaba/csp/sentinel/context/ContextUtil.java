@@ -31,6 +31,13 @@ import com.alibaba.csp.sentinel.slotchain.StringResourceWrapper;
 import com.alibaba.csp.sentinel.slots.nodeselector.NodeSelectorSlot;
 
 /**
+ *
+ *
+ * 当前线程中获取或者创建context的工具类
+ *
+ * 每一次SphU.entry()调用都会在一个上下文中，而不是每次entry()调用产生一个上下文！
+ * 如果没有使用ContextUtil.entry()指定，会有一个默认的上下文
+ *
  * Utility class to get or create {@link Context} in current thread.
  *
  * <p>
@@ -45,25 +52,41 @@ import com.alibaba.csp.sentinel.slots.nodeselector.NodeSelectorSlot;
 public class ContextUtil {
 
     /**
+     * 线程中保存上下文的ThreadLocal
      * Store the context in ThreadLocal for easy access.
      */
     private static ThreadLocal<Context> contextHolder = new ThreadLocal<>();
 
     /**
+     *
+     * 持有所有的EntranceNode，每一个EntranceNode和一个名称不同的上下文关联
+     *
+     *
      * Holds all {@link EntranceNode}. Each {@link EntranceNode} is associated with a distinct context name.
      */
     private static volatile Map<String, DefaultNode> contextNameNodeMap = new HashMap<>();
 
     private static final ReentrantLock LOCK = new ReentrantLock();
+
+    /**
+     * null 上下文
+     */
     private static final Context NULL_CONTEXT = new NullContext();
 
     static {
         // Cache the entrance node for default context.
+        //先创建默认的上下文，缓存
         initDefaultContext();
     }
 
+    /**
+     * 初始化默认的上下文信息，其实没有真正的创建上下文，而是创建一个入口的统计节点EntranceNode,
+     * 并将该节点作为全局节点的子节点。并将EntranceNode放入缓存中
+     */
     private static void initDefaultContext() {
+
         String defaultContextName = Constants.CONTEXT_DEFAULT_NAME;
+
         EntranceNode node = new EntranceNode(new StringResourceWrapper(defaultContextName, EntryType.IN), null);
         Constants.ROOT.addChild(node);
         contextNameNodeMap.put(defaultContextName, node);
@@ -93,6 +116,9 @@ public class ContextUtil {
      * same {@link EntranceNode} globally.
      * </p>
      * <p>
+     *     origin node将在ClusterBUilderSlot中创建。
+     *     不同资源、不同origin会创建一个不同的node，origin node的总数为资源数量*调用源数量
+     *
      * The origin node will be created in {@link com.alibaba.csp.sentinel.slots.clusterbuilder.ClusterBuilderSlot}.
      * Note that each distinct {@code origin} of different resources will lead to creating different new
      * {@link Node}, meaning that total amount of created origin statistic nodes will be:<br/>
@@ -128,14 +154,19 @@ public class ContextUtil {
         Context context = contextHolder.get();
         //本地线程中没有
         if (context == null) {
+            //查看缓存中是否存在EntranceNode类型的调用链入口节点
             Map<String, DefaultNode> localCacheNameMap = contextNameNodeMap;
             DefaultNode node = localCacheNameMap.get(name);
+            //如果没有
             if (node == null) {
+                //如果运行创建的调用链超过2000，则返回空的上下文。
+                // todo 这个地方如果这样限制，是否意味着一个sentinel中只能存在2000个上下文
                 if (localCacheNameMap.size() > Constants.MAX_CONTEXT_NAME_SIZE) {
                     setNullContext();
                     return NULL_CONTEXT;
                 } else {
                     try {
+                        //防止多个线程同时进入，创建上下文名称相同的EntranceNode。
                         LOCK.lock();
                         node = contextNameNodeMap.get(name);
                         if (node == null) {
@@ -158,6 +189,7 @@ public class ContextUtil {
                     }
                 }
             }
+            //将EntranceNode和origin赋值给context，创建上下文
             context = new Context(node, name);
             context.setOrigin(origin);
             contextHolder.set(context);
@@ -168,6 +200,9 @@ public class ContextUtil {
 
     private static boolean shouldWarn = true;
 
+    /**
+     * 设置空的context
+     */
     private static void setNullContext() {
         contextHolder.set(NULL_CONTEXT);
         // Don't need to be thread-safe.
@@ -180,11 +215,17 @@ public class ContextUtil {
 
     /**
      * <p>
+     *     进入调用上下文，这个上下文标志着调用链的入口，上下文是被ThreadLocal包装的，每个线程只能有一个。
+     *
      * Enter the invocation context, which marks as the entrance of an invocation chain.
      * The context is wrapped with {@code ThreadLocal}, meaning that each thread has it's own {@link Context}.
      * New context will be created if current thread doesn't have one.
      * </p>
      * <p>
+     *
+     * 一个上下文将和一个EntraceNode节点绑定在一起，EntranceNode节点表示调用链的入口统计节点，同一个上下文共享一个EntranceNode节点。
+     * 同一个资源在不同的上下文中是被分开的。
+     *
      * A context will be bound with an {@link EntranceNode}, which represents the entrance statistic node
      * of the invocation chain. New {@link EntranceNode} will be created if
      * current context does't have one. Note that same context name will share

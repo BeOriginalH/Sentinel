@@ -18,6 +18,8 @@ package com.alibaba.csp.sentinel.slotchain;
 import com.alibaba.csp.sentinel.EntryType;
 
 /**
+ *
+ * 字符串类型的资源包装类
  * Common resource wrapper.
  *
  * @author qinan.qn

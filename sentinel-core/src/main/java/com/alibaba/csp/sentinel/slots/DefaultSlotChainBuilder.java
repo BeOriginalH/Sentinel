@@ -28,6 +28,7 @@ import com.alibaba.csp.sentinel.slots.statistic.StatisticSlot;
 import com.alibaba.csp.sentinel.slots.system.SystemSlot;
 
 /**
+ * 默认创建ProcessorSlotChain的builder
  * Builder for a default {@link ProcessorSlotChain}.
  *
  * @author qinan.qn

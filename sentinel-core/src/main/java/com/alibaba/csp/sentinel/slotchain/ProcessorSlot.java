@@ -18,6 +18,7 @@ package com.alibaba.csp.sentinel.slotchain;
 import com.alibaba.csp.sentinel.context.Context;
 
 /**
+ * 插槽处理基本对象，定义进入和完成时的方法
  * A container of some process and ways of notification when the process is finished.
  *
  * @author qinan.qn
@@ -28,6 +29,7 @@ import com.alibaba.csp.sentinel.context.Context;
 public interface ProcessorSlot<T> {
 
     /**
+     * 进入slot
      * Entrance of this slot.
      *
      * @param context         current {@link Context}
@@ -42,6 +44,7 @@ public interface ProcessorSlot<T> {
                Object... args) throws Throwable;
 
     /**
+     * 表示完成了entry()方法
      * Means finish of {@link #entry(Context, ResourceWrapper, Object, int, boolean, Object...)}.
      *
      * @param context         current {@link Context}
@@ -56,6 +59,7 @@ public interface ProcessorSlot<T> {
                    Object... args) throws Throwable;
 
     /**
+     * 退出slot
      * Exit of this slot.
      *
      * @param context         current {@link Context}
@@ -66,6 +70,7 @@ public interface ProcessorSlot<T> {
     void exit(Context context, ResourceWrapper resourceWrapper, int count, Object... args);
 
     /**
+     * 表示完成了exit()方法
      * Means finish of {@link #exit(Context, ResourceWrapper, int, Object...)}.
      *
      * @param context         current {@link Context}

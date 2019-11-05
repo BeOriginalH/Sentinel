@@ -18,6 +18,7 @@ package com.alibaba.csp.sentinel.slotchain;
 import com.alibaba.csp.sentinel.context.Context;
 
 /**
+ * ProcessorSlot的默认实现类，主要负责进入下一个slot
  * @author qinan.qn
  * @author jialiang.linjl
  */
@@ -25,6 +26,16 @@ public abstract class AbstractLinkedProcessorSlot<T> implements ProcessorSlot<T>
 
     private AbstractLinkedProcessorSlot<?> next = null;
 
+    /**
+     * 当entry()方法完成之后，进入下一个slot的transformEntry()
+     * @param context         current {@link Context}
+     * @param resourceWrapper current resource
+     * @param obj             relevant object (e.g. Node)
+     * @param count           tokens needed
+     * @param prioritized     whether the entry is prioritized
+     * @param args            parameters of the original call
+     * @throws Throwable
+     */
     @Override
     public void fireEntry(Context context, ResourceWrapper resourceWrapper, Object obj, int count, boolean prioritized, Object... args)
         throws Throwable {
@@ -33,6 +44,16 @@ public abstract class AbstractLinkedProcessorSlot<T> implements ProcessorSlot<T>
         }
     }
 
+    /**
+     * 其实就是一个转换
+     * @param context
+     * @param resourceWrapper
+     * @param o
+     * @param count
+     * @param prioritized
+     * @param args
+     * @throws Throwable
+     */
     @SuppressWarnings("unchecked")
     void transformEntry(Context context, ResourceWrapper resourceWrapper, Object o, int count, boolean prioritized, Object... args)
         throws Throwable {
@@ -40,6 +61,13 @@ public abstract class AbstractLinkedProcessorSlot<T> implements ProcessorSlot<T>
         entry(context, resourceWrapper, t, count, prioritized, args);
     }
 
+    /**
+     * 当完成exit()方法的时候，调用下一个slot的exit
+     * @param context         current {@link Context}
+     * @param resourceWrapper current resource
+     * @param count           tokens needed
+     * @param args            parameters of the original call
+     */
     @Override
     public void fireExit(Context context, ResourceWrapper resourceWrapper, int count, Object... args) {
         if (next != null) {

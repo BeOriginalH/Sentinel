@@ -16,6 +16,7 @@
 package com.alibaba.csp.sentinel.slotchain;
 
 /**
+ * 将所有的处理插槽连接为一个链路
  * Link all processor slots as a chain.
  *
  * @author qinan.qn
@@ -23,6 +24,7 @@ package com.alibaba.csp.sentinel.slotchain;
 public abstract class ProcessorSlotChain extends AbstractLinkedProcessorSlot<Object> {
 
     /**
+     * 新增一个处理插槽到链路的头部
      * Add a processor to the head of this slot chain.
      *
      * @param protocolProcessor processor to be added.
@@ -30,6 +32,7 @@ public abstract class ProcessorSlotChain extends AbstractLinkedProcessorSlot<Obj
     public abstract void addFirst(AbstractLinkedProcessorSlot<?> protocolProcessor);
 
     /**
+     * 新增一个处理插槽到链路的尾部
      * Add a processor to the tail of this slot chain.
      *
      * @param protocolProcessor processor to be added.

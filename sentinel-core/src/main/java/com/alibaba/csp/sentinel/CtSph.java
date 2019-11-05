@@ -45,6 +45,7 @@ public class CtSph implements Sph {
     private static final Object[] OBJECTS0 = new Object[0];
 
     /**
+     * 保存资源和插槽处理链的映射关系
      * Same resource({@link ResourceWrapper#equals(Object)}) will share the same
      * {@link ProcessorSlotChain}, no matter in which {@link Context}.
      */
@@ -114,15 +115,26 @@ public class CtSph implements Sph {
         return asyncEntryWithPriorityInternal(resourceWrapper, count, false, args);
     }
 
+    /**
+     * 创建entry
+     * @param resourceWrapper
+     * @param count
+     * @param prioritized
+     * @param args
+     * @return
+     * @throws BlockException
+     */
     private Entry entryWithPriority(ResourceWrapper resourceWrapper, int count, boolean prioritized, Object... args)
         throws BlockException {
+        //获取当前线程中的上下文
         Context context = ContextUtil.getContext();
+        //如果是NullContext，则返回一个没有chain的entry对象，意味着不需要进行slot的检查
         if (context instanceof NullContext) {
             // The {@link NullContext} indicates that the amount of context has exceeded the threshold,
             // so here init the entry only. No rule checking will be done.
             return new CtEntry(resourceWrapper, null, context);
         }
-
+        //如果不存在context，创建一个默认的context
         if (context == null) {
             // Using default context.
             context = MyContextUtil.myEnter(Constants.CONTEXT_DEFAULT_NAME, "", resourceWrapper.getType());
@@ -130,19 +142,22 @@ public class CtSph implements Sph {
 
         // Global switch is close, no rule checking will do.
         if (!Constants.ON) {
+            //如果不需要检查的开关开启，则创建一个没有chain的entry对象，意味着不需要进行slot的检查
             return new CtEntry(resourceWrapper, null, context);
         }
 
+        //获取插槽处理链
         ProcessorSlot<Object> chain = lookProcessChain(resourceWrapper);
 
         /*
          * Means amount of resources (slot chain) exceeds {@link Constants.MAX_SLOT_CHAIN_SIZE},
          * so no rule checking will be done.
          */
+        //如果不存在插槽处理链，则创建一个没有chain的entry对象，意味着不需要进行slot的检查
         if (chain == null) {
             return new CtEntry(resourceWrapper, null, context);
         }
-
+        //创建一个entry
         Entry e = new CtEntry(resourceWrapper, chain, context);
         try {
             chain.entry(context, resourceWrapper, null, count, prioritized, args);
@@ -177,6 +192,10 @@ public class CtSph implements Sph {
     }
 
     /**
+     * 获取资源的插槽处理链，如果不存在，则新建一个
+     * 同一个资源会共享同一个插槽处理链，不区分上下文
+     * 插槽数量不能超过指定的值，默认为6000
+     *
      * Get {@link ProcessorSlotChain} of the resource. new {@link ProcessorSlotChain} will
      * be created if the resource doesn't relate one.
      *
@@ -192,16 +211,18 @@ public class CtSph implements Sph {
      * @return {@link ProcessorSlotChain} of the resource
      */
     ProcessorSlot<Object> lookProcessChain(ResourceWrapper resourceWrapper) {
+        //先从缓存中获取，如果没有再创建
         ProcessorSlotChain chain = chainMap.get(resourceWrapper);
         if (chain == null) {
             synchronized (LOCK) {
                 chain = chainMap.get(resourceWrapper);
                 if (chain == null) {
-                    // Entry size limit.
+                    // Entry size limit. 处理链的数量不能超过6000,
+                    //todo 意味着同时只能存在6000个资源被访问？
                     if (chainMap.size() >= Constants.MAX_SLOT_CHAIN_SIZE) {
                         return null;
                     }
-
+                    //创建处理链
                     chain = SlotChainProvider.newSlotChain();
                     Map<ResourceWrapper, ProcessorSlotChain> newMap = new HashMap<ResourceWrapper, ProcessorSlotChain>(
                         chainMap.size() + 1);

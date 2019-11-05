@@ -38,6 +38,8 @@ public final class SlotChainProvider {
      * @return new created slot chain
      */
     public static ProcessorSlotChain newSlotChain() {
+
+        //如果builder不为空，创建chain，否则先创建builder，再创建chain
         if (slotChainBuilder != null) {
             return slotChainBuilder.build();
         }

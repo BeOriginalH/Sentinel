@@ -18,11 +18,13 @@ package com.alibaba.csp.sentinel.slotchain;
 import com.alibaba.csp.sentinel.context.Context;
 
 /**
+ * 默认的处理插槽链
  * @author qinan.qn
  * @author jialiang.linjl
  */
 public class DefaultProcessorSlotChain extends ProcessorSlotChain {
 
+    //默认先创建一个头结点插槽
     AbstractLinkedProcessorSlot<?> first = new AbstractLinkedProcessorSlot<Object>() {
 
         @Override

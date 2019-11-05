@@ -26,7 +26,12 @@ import com.alibaba.csp.sentinel.slotchain.ResourceWrapper;
 import java.util.HashMap;
 import java.util.Map;
 
+
 /**
+ *
+ * NodeSelectorSlot会创建调用链，
+ * 如果有需要会创建一个新的DefaultNode作为最新的子节点
+ *
  * </p>
  * This class will try to build the calling traces via
  * <ol>
@@ -135,10 +140,13 @@ public class NodeSelectorSlot extends AbstractLinkedProcessorSlot<Object> {
         /*
          * It's interesting that we use context name rather resource name as the map key.
          *
+         * 同一个resource持有同一个chain，不区分上下文。同一个chain中。这个方法中的resource肯定是相同的，但是上下文不一定。
+         *
          * Remember that same resource({@link ResourceWrapper#equals(Object)}) will share
          * the same {@link ProcessorSlotChain} globally, no matter in which context. So if
          * code goes into {@link #entry(Context, ResourceWrapper, DefaultNode, int, Object...)},
          * the resource name must be same but context name may not.
+         *
          *
          * If we use {@link com.alibaba.csp.sentinel.SphU#entry(String resource)} to
          * enter same resource in different context, using context name as map key can
@@ -150,6 +158,7 @@ public class NodeSelectorSlot extends AbstractLinkedProcessorSlot<Object> {
          * The answer is all {@link DefaultNode}s with same resource name share one
          * {@link ClusterNode}. See {@link ClusterBuilderSlot} for detail.
          */
+        //以context为维度创建DefaultNode，这个地方resource是一样的。
         DefaultNode node = map.get(context.getName());
         if (node == null) {
             synchronized (this) {

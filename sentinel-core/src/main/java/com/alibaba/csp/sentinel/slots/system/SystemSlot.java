@@ -22,6 +22,7 @@ import com.alibaba.csp.sentinel.slotchain.ProcessorSlot;
 import com.alibaba.csp.sentinel.slotchain.ResourceWrapper;
 
 /**
+ * 系统自适应限流
  * A {@link ProcessorSlot} that dedicates to {@link SystemRule} checking.
  *
  * @author jialiang.linjl

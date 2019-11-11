@@ -12,6 +12,8 @@ import com.alibaba.csp.sentinel.slots.block.flow.FlowRuleManager;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.alibaba.csp.sentinel.slots.block.RuleConstant;
+
 /**
  * @author harvey
  * @date 2019/10/29
@@ -25,8 +27,10 @@ public class FlowSimpleDemo{
         FlowRule rule = new FlowRule();
         rule.setResource("HelloWorld");
         rule.setGrade(RuleConstant.FLOW_GRADE_QPS);
-        // Set limit QPS to 20.
         rule.setCount(20);
+        rule.setLimitApp("app1");
+        rule.setStrategy(RuleConstant.STRATEGY_DIRECT);
+        rule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_DEFAULT);
         rules.add(rule);
         FlowRuleManager.loadRules(rules);
     }
@@ -42,6 +46,7 @@ public class FlowSimpleDemo{
         rules.add(rule);
         FlowRuleManager.loadRules(rules);
     }
+
     private static void initFlowRules2() {
 
         List<FlowRule> rules = new ArrayList<>();
@@ -57,58 +62,50 @@ public class FlowSimpleDemo{
     public static void main(String[] args) {
         // 配置规则.
         initFlowRules();
-        initFlowRules1();
-        initFlowRules2();
 
-        while (true) {
-            Entry entry = null;
-            Entry entry1 = null;
-            Entry entry3 = null;
-            Entry entry2 = null;
+        Entry entry = null;
+        Entry entry1 = null;
+        Entry entry3 = null;
+        Entry entry2 = null;
 
-            Context context1 = ContextUtil.enter("context1");
+        new Thread(new Runnable(){
 
+            @Override
+            public void run() {
 
-            ContextUtil.exit();
-            Context context2 = ContextUtil.enter("context2");
-
-
-            try {
-
-                entry = SphU.entry("HelloWorld");
-                System.out.println("hello world");
-
-                entry2 = SphU.entry("HelloWorld1");
-                System.out.println("hello world");
-
-                entry1 = SphU.entry("HelloWorld");
-                System.out.println("hello world");
-
-                entry3 = SphU.entry("HelloWorld1");
-                System.out.println("hello world");
-
-
-
-            } catch (BlockException e1) {
-                System.out.println("blocked!");
-            } finally {
-                if (entry3 != null) {
-                    entry3.exit();
+                ContextUtil.enter("context1", "app1");
+                Entry helloWorld = null;
+                try {
+                    helloWorld = SphU.entry("HelloWorld");
+                } catch (Exception e) {
+                    System.out.println(e);
+                } finally {
+                    helloWorld.exit();
                 }
-                if (entry1 != null) {
-                    entry1.exit();
-                }
-                if (entry2 != null) {
-                    entry2.exit();
-                }
-                if (entry != null) {
-                    entry.exit();
-                }
-                ContextUtil.exit();
+                System.out.println("test");
             }
+        }).start();
 
-        }
+        new Thread(new Runnable(){
+
+            @Override
+            public void run() {
+
+                ContextUtil.enter("context2", "app1");
+                Entry helloWorld = null;
+                try {
+                    helloWorld = SphU.entry("HelloWorld");
+                } catch (Exception e) {
+                    System.out.println(e);
+                } finally {
+                    helloWorld.exit();
+                }
+                System.out.println("test");
+            }
+        }).start();
+
     }
+
 }
 
 

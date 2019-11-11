@@ -35,6 +35,7 @@ import com.alibaba.csp.sentinel.util.StringUtil;
 import com.alibaba.csp.sentinel.util.function.Function;
 
 /**
+ * 流量规则检查器
  * Rule checker for flow control rules.
  *
  * @author Eric Zhao
@@ -85,6 +86,13 @@ public class FlowRuleChecker {
         return rule.getRater().canPass(selectedNode, acquireCount, prioritized);
     }
 
+    /**
+     * 选择引用的节点
+     * @param rule
+     * @param context
+     * @param node
+     * @return
+     */
     static Node selectReferenceNode(FlowRule rule, Context context, DefaultNode node) {
         String refResource = rule.getRefResource();
         int strategy = rule.getStrategy();
@@ -107,18 +115,32 @@ public class FlowRuleChecker {
         return null;
     }
 
+    /**
+     * 请求源是否为default或者other,如果是其中一个，返回false
+     * @param origin
+     * @return
+     */
     private static boolean filterOrigin(String origin) {
         // Origin cannot be `default` or `other`.
         return !RuleConstant.LIMIT_APP_DEFAULT.equals(origin) && !RuleConstant.LIMIT_APP_OTHER.equals(origin);
     }
 
+    /**
+     * 根据请求源和策略选择统计节点
+     * @param rule
+     * @param context
+     * @param node
+     * @return
+     */
     static Node selectNodeByRequesterAndStrategy(/*@NonNull*/ FlowRule rule, Context context, DefaultNode node) {
         // The limit app should not be empty.
         String limitApp = rule.getLimitApp();
         int strategy = rule.getStrategy();
         String origin = context.getOrigin();
 
+        //如果请求源和限制源一致，并且不是default或者other
         if (limitApp.equals(origin) && filterOrigin(origin)) {
+            //如果策略为直连，则返回源节点
             if (strategy == RuleConstant.STRATEGY_DIRECT) {
                 // Matches limit origin, return origin statistic node.
                 return context.getOriginNode();

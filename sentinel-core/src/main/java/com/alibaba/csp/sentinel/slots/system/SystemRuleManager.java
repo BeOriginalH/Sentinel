@@ -65,6 +65,7 @@ import com.alibaba.csp.sentinel.slots.block.BlockException;
  */
 public class SystemRuleManager {
 
+
     private static volatile double highestSystemLoad = Double.MAX_VALUE;
     /**
      * cpu usage, between [0, 1]
@@ -82,10 +83,21 @@ public class SystemRuleManager {
     private static volatile boolean maxRtIsSet = false;
     private static volatile boolean maxThreadIsSet = false;
 
+    /**
+     * 是否存在指定的系统规则，即是否调用SystemRuleManager.loadRules()加载规则
+     */
     private static AtomicBoolean checkSystemStatus = new AtomicBoolean(false);
 
+    /**
+     * 一个获取系统当前的load和cpu使用的任务
+     */
     private static SystemStatusListener statusListener = null;
+
+    /**
+     * 系统规则改变后的处理器，主要将规则设置为指定的规则
+     */
     private final static SystemPropertyListener listener = new SystemPropertyListener();
+
     private static SentinelProperty<List<SystemRule>> currentProperty = new DynamicSentinelProperty<List<SystemRule>>();
 
     @SuppressWarnings("PMD.ThreadPoolCreationRule")
@@ -95,6 +107,7 @@ public class SystemRuleManager {
     static {
         checkSystemStatus.set(false);
         statusListener = new SystemStatusListener();
+        //定时任务5秒后开始，每秒执行一次
         scheduler.scheduleAtFixedRate(statusListener, 5, 1, TimeUnit.SECONDS);
         currentProperty.addListener(listener);
     }
@@ -114,6 +127,7 @@ public class SystemRuleManager {
     }
 
     /**
+     * 加载配置的SystemRule，之前的规则会被替换掉
      * Load {@link SystemRule}s, former rules will be replaced.
      *
      * @param rules new rules to load.
@@ -183,8 +197,15 @@ public class SystemRuleManager {
         return maxThread;
     }
 
+    /**
+     * 系统配置文件监听器
+     */
     static class SystemPropertyListener extends SimplePropertyListener<List<SystemRule>> {
 
+        /**
+         * 更新
+         * @param rules
+         */
         @Override
         public void configUpdate(List<SystemRule> rules) {
             restoreSetting();
@@ -211,6 +232,9 @@ public class SystemRuleManager {
                 qps));
         }
 
+        /**
+         * 恢复默认值
+         */
         protected void restoreSetting() {
             checkSystemStatus.set(false);
 
@@ -246,6 +270,10 @@ public class SystemRuleManager {
         return highestCpuUsage;
     }
 
+    /**
+     * 加载系统配置，将默认的规则参数设置为指定的规则
+     * @param rule
+     */
     public static void loadSystemConf(SystemRule rule) {
         boolean checkStatus = false;
         // Check if it's valid.
@@ -284,6 +312,7 @@ public class SystemRuleManager {
     }
 
     /**
+     * 系统自适应限流规则检查
      * Apply {@link SystemRule} to the resource. Only inbound traffic will be checked.
      *
      * @param resourceWrapper the resource.
@@ -291,14 +320,19 @@ public class SystemRuleManager {
      */
     public static void checkSystem(ResourceWrapper resourceWrapper) throws BlockException {
         // Ensure the checking switch is on.
+        //如果没有加入系统规则，则不需要检查
         if (!checkSystemStatus.get()) {
             return;
         }
 
         // for inbound traffic only
+        //如果不是系统入口的资源，不检查
         if (resourceWrapper.getType() != EntryType.IN) {
             return;
         }
+
+        //根据全局的ClusterNode获取数据指标，ClusterNode是一个类变量，全局唯一，类加载后生成。
+        // 每次通过check后再StatisticSlot中累加统计
 
         // total qps
         double currentQps = Constants.ENTRY_NODE == null ? 0.0 : Constants.ENTRY_NODE.successQps();
@@ -318,6 +352,7 @@ public class SystemRuleManager {
         }
 
         // load. BBR algorithm.
+        //如果当前机器的load大于设置的值
         if (highestSystemLoadIsSet && getCurrentSystemAvgLoad() > highestSystemLoad) {
             if (!checkBbr(currentThread)) {
                 throw new SystemBlockException(resourceWrapper.getName(), "load");
@@ -332,6 +367,11 @@ public class SystemRuleManager {
         }
     }
 
+    /**
+     * 检查bbr
+     * @param currentThread
+     * @return
+     */
     private static boolean checkBbr(int currentThread) {
         if (currentThread > 1 &&
             currentThread > Constants.ENTRY_NODE.maxSuccessQps() * Constants.ENTRY_NODE.minRt() / 1000) {

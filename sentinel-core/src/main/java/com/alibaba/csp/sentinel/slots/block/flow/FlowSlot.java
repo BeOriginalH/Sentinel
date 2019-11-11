@@ -29,6 +29,7 @@ import com.alibaba.csp.sentinel.util.function.Function;
 
 /**
  * <p>
+ *
  * Combined the runtime statistics collected from the previous
  * slots (NodeSelectorSlot, ClusterNodeBuilderSlot, and StatisticSlot), FlowSlot
  * will use pre-set rules to decide whether the incoming requests should be
@@ -138,6 +139,9 @@ import com.alibaba.csp.sentinel.util.function.Function;
  */
 public class FlowSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
 
+    /**
+     * 流量规则检查器
+     */
     private final FlowRuleChecker checker;
 
     public FlowSlot() {
@@ -163,6 +167,15 @@ public class FlowSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
         fireEntry(context, resourceWrapper, node, count, prioritized, args);
     }
 
+    /**
+     * 流量检查
+     * @param resource
+     * @param context
+     * @param node
+     * @param count
+     * @param prioritized
+     * @throws BlockException
+     */
     void checkFlow(ResourceWrapper resource, Context context, DefaultNode node, int count, boolean prioritized)
         throws BlockException {
         checker.checkFlow(ruleProvider, resource, context, node, count, prioritized);
@@ -173,6 +186,9 @@ public class FlowSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
         fireExit(context, resourceWrapper, count, args);
     }
 
+    /**
+     * 规则提供者
+     */
     private final Function<String, Collection<FlowRule>> ruleProvider = new Function<String, Collection<FlowRule>>() {
         @Override
         public Collection<FlowRule> apply(String resource) {

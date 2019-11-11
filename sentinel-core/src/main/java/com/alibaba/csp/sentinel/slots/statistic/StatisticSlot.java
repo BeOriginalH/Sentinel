@@ -57,16 +57,19 @@ public class StatisticSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
             fireEntry(context, resourceWrapper, node, count, prioritized, args);
 
             // Request passed, add thread count and pass count.
-            //节点线程数和通过数累加
+            //线程数加一，defaultNode和clusterNode同时累加。
             node.increaseThreadNum();
+            //请求通过数，defaultNode和clusterNode同时累加，窗口时间
             node.addPassRequest(count);
 
+            //如果来源节点不为空，则统计来源节点
             if (context.getCurEntry().getOriginNode() != null) {
                 // Add count for origin node.
                 context.getCurEntry().getOriginNode().increaseThreadNum();
                 context.getCurEntry().getOriginNode().addPassRequest(count);
             }
 
+            //entryType为in的，使用一个全局的clusternode来统计
             if (resourceWrapper.getType() == EntryType.IN) {
                 // Add count for global inbound entry node for global statistics.
                 Constants.ENTRY_NODE.increaseThreadNum();

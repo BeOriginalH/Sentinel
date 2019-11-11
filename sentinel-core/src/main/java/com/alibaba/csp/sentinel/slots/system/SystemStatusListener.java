@@ -24,25 +24,40 @@ import com.alibaba.csp.sentinel.util.StringUtil;
 import com.sun.management.OperatingSystemMXBean;
 
 /**
+ * 一个获取系统当前load和cpu使用率的任务
+ *
  * @author jialiang.linjl
  */
-public class SystemStatusListener implements Runnable {
+public class SystemStatusListener implements Runnable{
 
+    /**
+     * 当前负载
+     */
     volatile double currentLoad = -1;
+
+    /**
+     * 当前cpu使用
+     */
     volatile double currentCpuUsage = -1;
 
     volatile String reason = StringUtil.EMPTY;
 
     public double getSystemAverageLoad() {
+
         return currentLoad;
     }
 
     public double getCpuUsage() {
+
         return currentCpuUsage;
     }
 
+    /**
+     * 获取当前的机器相关的信息
+     */
     @Override
     public void run() {
+
         try {
             OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
             currentLoad = osBean.getSystemLoadAverage();

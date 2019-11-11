@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.alibaba.csp.sentinel.slots.block.authority;
 
 import java.util.ArrayList;
@@ -31,17 +32,28 @@ import com.alibaba.csp.sentinel.property.PropertyListener;
 import com.alibaba.csp.sentinel.property.SentinelProperty;
 
 /**
+ * 权限认证规则管理器
  * Manager for authority rules.
  *
- * @author youji.zj
+ * @author youji.zjß
  * @author jialiang.linjl
  * @author Eric Zhao
  */
 public final class AuthorityRuleManager {
 
+    /**
+     * 保存权限配置，以resource为key,所以同一个resource只能有一个最新的权限规则
+     */
     private static Map<String, Set<AuthorityRule>> authorityRules = new ConcurrentHashMap<>();
 
+    /**
+     * 规则监听器
+     */
     private static final RulePropertyListener LISTENER = new RulePropertyListener();
+
+    /**
+     * 动态规则配置
+     */
     private static SentinelProperty<List<AuthorityRule>> currentProperty = new DynamicSentinelProperty<>();
 
     static {
@@ -61,6 +73,7 @@ public final class AuthorityRuleManager {
     }
 
     /**
+     * 加载权限规则
      * Load the authority rules to memory.
      *
      * @param rules list of authority rules
@@ -89,10 +102,14 @@ public final class AuthorityRuleManager {
         return rules;
     }
 
+    /**
+     * 规则监听器
+     */
     private static class RulePropertyListener implements PropertyListener<List<AuthorityRule>> {
 
         @Override
         public void configUpdate(List<AuthorityRule> conf) {
+
             Map<String, Set<AuthorityRule>> rules = loadAuthorityConf(conf);
 
             authorityRules.clear();
@@ -102,7 +119,13 @@ public final class AuthorityRuleManager {
             RecordLog.info("[AuthorityRuleManager] Authority rules received: " + authorityRules);
         }
 
+        /**
+         * 加载权限配置
+         * @param list
+         * @return
+         */
         private Map<String, Set<AuthorityRule>> loadAuthorityConf(List<AuthorityRule> list) {
+
             Map<String, Set<AuthorityRule>> newRuleMap = new ConcurrentHashMap<>();
 
             if (list == null || list.isEmpty()) {
@@ -153,6 +176,6 @@ public final class AuthorityRuleManager {
 
     public static boolean isValidRule(AuthorityRule rule) {
         return rule != null && !StringUtil.isBlank(rule.getResource())
-            && rule.getStrategy() >= 0 && StringUtil.isNotBlank(rule.getLimitApp());
+                && rule.getStrategy() >= 0 && StringUtil.isNotBlank(rule.getLimitApp());
     }
 }

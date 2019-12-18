@@ -59,52 +59,63 @@ public class FlowSimpleDemo{
         FlowRuleManager.loadRules(rules);
     }
 
-    public static void main(String[] args) {
-        // 配置规则.
-        initFlowRules();
+    public static void main(String[] args)   throws Exception{
+        ContextUtil.enter("context1","orgin1");
+        Entry entry = SphU.entry("resource1");
+        SphU.entry("resource1");
+        SphU.entry("resource2'");
+        SphU.entry("resource2");
+        SphU.entry("resource3");
 
-        Entry entry = null;
-        Entry entry1 = null;
-        Entry entry3 = null;
-        Entry entry2 = null;
-
-        new Thread(new Runnable(){
-
-            @Override
-            public void run() {
-
-                ContextUtil.enter("context1", "app1");
-                Entry helloWorld = null;
-                try {
-                    helloWorld = SphU.entry("HelloWorld");
-                } catch (Exception e) {
-                    System.out.println(e);
-                } finally {
-                    helloWorld.exit();
-                }
-                System.out.println("test");
-            }
-        }).start();
-
-        new Thread(new Runnable(){
-
-            @Override
-            public void run() {
-
-                ContextUtil.enter("context2", "app1");
-                Entry helloWorld = null;
-                try {
-                    helloWorld = SphU.entry("HelloWorld");
-                } catch (Exception e) {
-                    System.out.println(e);
-                } finally {
-                    helloWorld.exit();
-                }
-                System.out.println("test");
-            }
-        }).start();
 
     }
+
+//    public static void main(String[] args) {
+//        // 配置规则.
+//        initFlowRules();
+//
+//        Entry entry = null;
+//        Entry entry1 = null;
+//        Entry entry3 = null;
+//        Entry entry2 = null;
+//
+//        new Thread(new Runnable(){
+//
+//            @Override
+//            public void run() {
+//
+//                ContextUtil.enter("context1", "app1");
+//                Entry helloWorld = null;
+//                try {
+//                    helloWorld = SphU.entry("HelloWorld");
+//                } catch (Exception e) {
+//                    System.out.println(e);
+//                } finally {
+//                    helloWorld.exit();
+//                }
+//                System.out.println("test");
+//            }
+//        }).start();
+//
+//        new Thread(new Runnable(){
+//
+//            @Override
+//            public void run() {
+//
+//                ContextUtil.enter("context2", "app1");
+//                Entry helloWorld = null;
+//                try {
+//                    helloWorld = SphU.entry("HelloWorld");
+//                } catch (Exception e) {
+//                    System.out.println(e);
+//                } finally {
+//                    helloWorld.exit();
+//                }
+//                System.out.println("test");
+//            }
+//        }).start();
+//
+//    }
 
 }
 

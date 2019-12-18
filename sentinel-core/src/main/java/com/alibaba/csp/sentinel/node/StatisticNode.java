@@ -228,13 +228,16 @@ public class StatisticNode implements Node {
         return rollingCounterInSecond.occupiedPass() / rollingCounterInSecond.getWindowIntervalInSec();
     }
 
+    /**
+     * 每秒内的总的响应时间除以成功请求数
+     * @return
+     */
     @Override
     public double avgRt() {
         long successCount = rollingCounterInSecond.success();
         if (successCount == 0) {
             return 0;
         }
-
         return rollingCounterInSecond.rt() * 1.0 / successCount;
     }
 

@@ -48,10 +48,15 @@ import com.alibaba.csp.sentinel.slots.block.BlockException;
  */
 public class StatisticSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
 
+    private ThreadLocal<Long> enterTime = new ThreadLocal<>();
+
     @Override
     public void entry(Context context, ResourceWrapper resourceWrapper, DefaultNode node, int count,
                       boolean prioritized, Object... args) throws Throwable {
         try {
+            Long time = System.currentTimeMillis();
+//            System.out.println("threadName: "+Thread.currentThread().getName()+" ,enterTime: "+time);
+            enterTime.set(time);
             // Do some checking.
             //先出发下一个slot作用，如果剩下的所有slot都没有抛出异常，代表没有被各种规则限制
             fireEntry(context, resourceWrapper, node, count, prioritized, args);
@@ -137,6 +142,9 @@ public class StatisticSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
     public void exit(Context context, ResourceWrapper resourceWrapper, int count, Object... args) {
         DefaultNode node = (DefaultNode)context.getCurNode();
 
+//        long time = System.currentTimeMillis();
+//        long cost = time - enterTime.get();
+//        System.out.println("threadName: "+Thread.currentThread().getName()+", exitTime: "+TimeUtil.currentTimeMillis());
         if (context.getCurEntry().getError() == null) {
             // Calculate response time (max RT is TIME_DROP_VALVE).
             long rt = TimeUtil.currentTimeMillis() - context.getCurEntry().getCreateTime();

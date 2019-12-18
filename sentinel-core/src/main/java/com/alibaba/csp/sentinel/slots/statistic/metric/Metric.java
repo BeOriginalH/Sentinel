@@ -21,6 +21,8 @@ import com.alibaba.csp.sentinel.node.metric.MetricNode;
 import com.alibaba.csp.sentinel.slots.statistic.data.MetricBucket;
 
 /**
+ *
+ * 一个描述资源调用情况的指标，定义各种获取指标和修改指标的操作接口
  * Represents a basic structure recording invocation metrics of protected resources.
  *
  * @author jialiang.linjl
@@ -29,6 +31,7 @@ import com.alibaba.csp.sentinel.slots.statistic.data.MetricBucket;
 public interface Metric extends DebugSupport {
 
     /**
+     * 总共成功的数量
      * Get total success count.
      *
      * @return success count
@@ -36,6 +39,7 @@ public interface Metric extends DebugSupport {
     long success();
 
     /**
+     * 最大成功的数量
      * Get max success count.
      *
      * @return max success count
@@ -43,6 +47,7 @@ public interface Metric extends DebugSupport {
     long maxSuccess();
 
     /**
+     * 异常总数
      * Get total exception count.
      *
      * @return exception count
@@ -50,6 +55,7 @@ public interface Metric extends DebugSupport {
     long exception();
 
     /**
+     * 阻塞总数
      * Get total block count.
      *
      * @return block count
@@ -57,6 +63,7 @@ public interface Metric extends DebugSupport {
     long block();
 
     /**
+     * 通过总数
      * Get total pass count. not include {@link #occupiedPass()}
      *
      * @return pass count
@@ -64,6 +71,7 @@ public interface Metric extends DebugSupport {
     long pass();
 
     /**
+     * 总的响应时间
      * Get total response time.
      *
      * @return total RT
@@ -71,6 +79,7 @@ public interface Metric extends DebugSupport {
     long rt();
 
     /**
+     * 最小的响应时间
      * Get the minimal RT.
      *
      * @return minimal RT
@@ -78,6 +87,7 @@ public interface Metric extends DebugSupport {
     long minRt();
 
     /**
+     *
      * Get aggregated metric nodes of all resources.
      *
      * @return metric node list of all resources
@@ -92,6 +102,7 @@ public interface Metric extends DebugSupport {
     MetricBucket[] windows();
 
     /**
+     * 添加异常总数
      * Add current exception count.
      *
      * @param n count to add
@@ -99,6 +110,7 @@ public interface Metric extends DebugSupport {
     void addException(int n);
 
     /**
+     * 添加阻塞总数
      * Add current block count.
      *
      * @param n count to add
@@ -106,6 +118,7 @@ public interface Metric extends DebugSupport {
     void addBlock(int n);
 
     /**
+     * 添加成功总数
      * Add current completed count.
      *
      * @param n count to add
@@ -113,6 +126,7 @@ public interface Metric extends DebugSupport {
     void addSuccess(int n);
 
     /**
+     * 添加通过总数
      * Add current pass count.
      *
      * @param n count to add
@@ -120,6 +134,7 @@ public interface Metric extends DebugSupport {
     void addPass(int n);
 
     /**
+     * 添加总的响应时间
      * Add given RT to current total RT.
      *
      * @param rt RT
@@ -127,6 +142,7 @@ public interface Metric extends DebugSupport {
     void addRT(long rt);
 
     /**
+     * 获取每秒窗口滑动的长度
      * Get the sliding window length in seconds.
      *
      * @return the sliding window length
@@ -134,6 +150,7 @@ public interface Metric extends DebugSupport {
     double getWindowIntervalInSec();
 
     /**
+     *
      * Get sample count of the sliding window.
      *
      * @return sample count of the sliding window.
@@ -152,6 +169,7 @@ public interface Metric extends DebugSupport {
     // Occupy-based (@since 1.5.0)
 
     /**
+     * 添加正在占据的数量
      * Add occupied pass, which represents pass requests that borrow the latter windows' token.
      *
      * @param acquireCount tokens count.
@@ -160,6 +178,7 @@ public interface Metric extends DebugSupport {
     void addOccupiedPass(int acquireCount);
 
     /**
+     * 添加正在等待通过的数量
      * Add request that occupied.
      *
      * @param futureTime   future timestamp that the acquireCount should be added on.
@@ -169,6 +188,7 @@ public interface Metric extends DebugSupport {
     void addWaiting(long futureTime, int acquireCount);
 
     /**
+     * 等待通过的数量
      * Get waiting pass account
      *
      * @return waiting pass count
@@ -177,6 +197,7 @@ public interface Metric extends DebugSupport {
     long waiting();
 
     /**
+     * 占据通过的数量
      * Get occupied pass count.
      *
      * @return occupied pass count

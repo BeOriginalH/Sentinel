@@ -83,14 +83,17 @@ public class RtDegradeDemo {
     private static AtomicInteger total = new AtomicInteger();
 
     private static volatile boolean stop = false;
-    private static final int threadCount = 100;
+    private static final int threadCount = 10;
     private static int seconds = 60 + 40;
 
     public static void main(String[] args) throws Exception {
 
+        //开启一个打印请求通过情况的线程
         tick();
+        //初始化降级规则
         initDegradeRule();
 
+        //开启100个线程，模拟进入的并发请求，
         for (int i = 0; i < threadCount; i++) {
             Thread entryThread = new Thread(new Runnable() {
 
@@ -99,7 +102,7 @@ public class RtDegradeDemo {
                     while (true) {
                         Entry entry = null;
                         try {
-                            TimeUnit.MILLISECONDS.sleep(5);
+//                            TimeUnit.MILLISECONDS.sleep(5);
                             entry = SphU.entry(KEY);
                             // token acquired
                             pass.incrementAndGet();
@@ -117,11 +120,14 @@ public class RtDegradeDemo {
                 }
 
             });
-            entryThread.setName("working-thread");
+//            entryThread.setName("working-thread");
             entryThread.start();
         }
     }
 
+    /**
+     * 初始化降级规则，请求数降级，10秒，平均响应时间10毫秒
+     */
     private static void initDegradeRule() {
         List<DegradeRule> rules = new ArrayList<DegradeRule>();
         DegradeRule rule = new DegradeRule();
@@ -134,12 +140,18 @@ public class RtDegradeDemo {
         DegradeRuleManager.loadRules(rules);
     }
 
+    /**
+     * 开启一个线程，进行数据打印
+     */
     private static void tick() {
         Thread timer = new Thread(new TimerTask());
         timer.setName("sentinel-timer-task");
         timer.start();
     }
 
+    /**
+     * 打印每秒钟总共的请求数，通过的请求数，未通过的请求数，打印100秒内的数据
+     */
     static class TimerTask implements Runnable {
 
         @Override

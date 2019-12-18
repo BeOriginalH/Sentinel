@@ -22,6 +22,8 @@ import com.alibaba.csp.sentinel.slotchain.ProcessorSlot;
 import com.alibaba.csp.sentinel.slotchain.ResourceWrapper;
 
 /**
+ * 降级处理
+ *
  * A {@link ProcessorSlot} dedicates to {@link DegradeRule} checking.
  *
  * @author leyou

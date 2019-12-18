@@ -37,15 +37,25 @@ import com.alibaba.csp.sentinel.util.AssertUtil;
 import com.alibaba.csp.sentinel.util.StringUtil;
 
 /**
+ * 降级规则管理器
+ *
  * @author youji.zj
  * @author jialiang.linjl
  * @author Eric Zhao
  */
 public final class DegradeRuleManager {
 
+    /**
+     * 保存降级规则的缓存，以resource为key
+     */
     private static final Map<String, Set<DegradeRule>> degradeRules = new ConcurrentHashMap<>();
 
+    /**
+     * 规则改变处理器
+     */
     private static final RulePropertyListener LISTENER = new RulePropertyListener();
+
+
     private static SentinelProperty<List<DegradeRule>> currentProperty
         = new DynamicSentinelProperty<>();
 
@@ -69,6 +79,14 @@ public final class DegradeRuleManager {
         }
     }
 
+    /**
+     * 降级检查
+     * @param resource
+     * @param context
+     * @param node
+     * @param count
+     * @throws BlockException
+     */
     public static void checkDegrade(ResourceWrapper resource, Context context, DefaultNode node, int count)
         throws BlockException {
 
@@ -105,6 +123,8 @@ public final class DegradeRuleManager {
     }
 
     /**
+     * 加载规则，之前的规则会被替换掉
+     *
      * Load {@link DegradeRule}s, former rules will be replaced.
      *
      * @param rules new rules to load.
@@ -152,8 +172,16 @@ public final class DegradeRuleManager {
         }
     }
 
+    /**
+     * 规则改变处理器
+     */
     private static class RulePropertyListener implements PropertyListener<List<DegradeRule>> {
 
+        /**
+         * 规则更新
+         *
+         * @param conf
+         */
         @Override
         public void configUpdate(List<DegradeRule> conf) {
             Map<String, Set<DegradeRule>> rules = loadDegradeConf(conf);
@@ -174,7 +202,13 @@ public final class DegradeRuleManager {
             RecordLog.info("[DegradeRuleManager] Degrade rules loaded: " + degradeRules);
         }
 
+        /**
+         * 加载规则
+         * @param list
+         * @return
+         */
         private Map<String, Set<DegradeRule>> loadDegradeConf(List<DegradeRule> list) {
+
             Map<String, Set<DegradeRule>> newRuleMap = new ConcurrentHashMap<>();
 
             if (list == null || list.isEmpty()) {
@@ -205,6 +239,12 @@ public final class DegradeRuleManager {
         }
     }
 
+    /**
+     * 校验规则
+     *
+     * @param rule
+     * @return
+     */
     public static boolean isValidRule(DegradeRule rule) {
         boolean baseValid = rule != null && !StringUtil.isBlank(rule.getResource())
             && rule.getCount() >= 0 && rule.getTimeWindow() > 0;

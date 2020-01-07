@@ -1,6 +1,6 @@
 <img src="https://user-images.githubusercontent.com/9434884/43697219-3cb4ef3a-9975-11e8-9a9c-73f4f537442d.png" alt="Sentinel Logo" width="50%">
 
-# Sentinel: Sentinel of Your Application
+# Sentinel: The Sentinel of Your Microservices
 
 [![Travis Build Status](https://travis-ci.org/alibaba/Sentinel.svg?branch=master)](https://travis-ci.org/alibaba/Sentinel)
 [![Codecov](https://codecov.io/gh/alibaba/Sentinel/branch/master/graph/badge.svg)](https://codecov.io/gh/alibaba/Sentinel)
@@ -30,8 +30,9 @@ See the [中文文档](https://github.com/alibaba/Sentinel/wiki/%E4%BB%8B%E7%BB%
 
 See the [Wiki](https://github.com/alibaba/Sentinel/wiki) for full documentation, examples, blog posts, operational details and other information.
 
-Sentinel provides integration module for various open-source frameworks and libraries
-(e.g. Spring Cloud, Apache Dubbo, gRPC, Spring WebFlux, Reactor). You can refer to [the document](https://github.com/alibaba/Sentinel/wiki/Adapters-to-Popular-Framework) for more information.
+Sentinel provides integration modules for various open-source frameworks
+(e.g. Spring Cloud, Apache Dubbo, gRPC, Spring WebFlux, Reactor) and service mesh.
+You can refer to [the document](https://github.com/alibaba/Sentinel/wiki/Adapters-to-Popular-Framework) for more information.
 
 If you are using Sentinel, please [**leave a comment here**](https://github.com/alibaba/Sentinel/issues/18) to tell us your scenario to make Sentinel better.
 It's also encouraged to add the link of your blog post, tutorial, demo or customized components to [**Awesome Sentinel**](./doc/awesome-sentinel.md).
@@ -55,7 +56,7 @@ If your application is build in Maven, just add the following dependency in `pom
 <dependency>
     <groupId>com.alibaba.csp</groupId>
     <artifactId>sentinel-core</artifactId>
-    <version>1.6.1</version>
+    <version>1.7.1</version>
 </dependency>
 ```
 
@@ -74,6 +75,7 @@ try (Entry entry = SphU.entry("HelloWorld")) {
     // Handle rejected request.
     e.printStackTrace();
 }
+// try-with-resources auto exit
 ```
 
 So far the code modification is done. We also provide [annotation support module](https://github.com/alibaba/Sentinel/blob/master/sentinel-extension/sentinel-annotation-aspectj/README.md) to define resource easier.
@@ -124,11 +126,14 @@ Samples can be found in the [sentinel-demo](https://github.com/alibaba/Sentinel/
 
 Sentinel also provides a simple dashboard application, on which you can monitor the clients and configure the rules in real time.
 
+![dashboard](https://user-images.githubusercontent.com/9434884/55449295-84866d80-55fd-11e9-94e5-d3441f4a2b63.png)
+
 For details please refer to [Dashboard](https://github.com/alibaba/Sentinel/wiki/Dashboard).
 
 ## Trouble Shooting and Logs
 
-Sentinel will generate logs for troubleshooting. All the information can be found in [logs](https://github.com/alibaba/Sentinel/wiki/Logs).
+Sentinel will generate logs for troubleshooting and real-time monitoring.
+All the information can be found in [logs](https://github.com/alibaba/Sentinel/wiki/Logs).
 
 ## Bugs and Feedback
 

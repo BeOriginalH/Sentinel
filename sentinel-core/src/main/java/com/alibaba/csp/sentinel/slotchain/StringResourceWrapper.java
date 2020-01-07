@@ -16,28 +16,24 @@
 package com.alibaba.csp.sentinel.slotchain;
 
 import com.alibaba.csp.sentinel.EntryType;
+import com.alibaba.csp.sentinel.ResourceTypeConstants;
 
 /**
  *
  * 字符串类型的资源包装类
- * Common resource wrapper.
- *
+ * Common string resource wrapper.
+
  * @author qinan.qn
  * @author jialiang.linjl
  */
 public class StringResourceWrapper extends ResourceWrapper {
 
-    public StringResourceWrapper(String name, EntryType type) {
-        if (name == null) {
-            throw new IllegalArgumentException("Resource name cannot be null");
-        }
-        this.name = name;
-        this.type = type;
+    public StringResourceWrapper(String name, EntryType e) {
+        super(name, e, ResourceTypeConstants.COMMON);
     }
 
-    @Override
-    public String getName() {
-        return name;
+    public StringResourceWrapper(String name, EntryType e, int resType) {
+        super(name, e, resType);
     }
 
     @Override
@@ -46,15 +42,11 @@ public class StringResourceWrapper extends ResourceWrapper {
     }
 
     @Override
-    public EntryType getType() {
-        return type;
-    }
-
-    @Override
     public String toString() {
         return "StringResourceWrapper{" +
             "name='" + name + '\'' +
-            ", type=" + type +
+            ", entryType=" + entryType +
+            ", resourceType=" + resourceType +
             '}';
     }
 }

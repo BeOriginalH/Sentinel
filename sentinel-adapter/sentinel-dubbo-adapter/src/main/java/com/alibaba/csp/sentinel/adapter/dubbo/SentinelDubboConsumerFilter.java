@@ -17,10 +17,11 @@ package com.alibaba.csp.sentinel.adapter.dubbo;
 
 import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.EntryType;
+import com.alibaba.csp.sentinel.ResourceTypeConstants;
 import com.alibaba.csp.sentinel.SphU;
 import com.alibaba.csp.sentinel.Tracer;
+import com.alibaba.csp.sentinel.adapter.dubbo.config.DubboConfig;
 import com.alibaba.csp.sentinel.adapter.dubbo.fallback.DubboFallbackRegistry;
-import com.alibaba.csp.sentinel.context.ContextUtil;
 import com.alibaba.csp.sentinel.log.RecordLog;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.dubbo.common.extension.Activate;
@@ -53,20 +54,24 @@ public class SentinelDubboConsumerFilter extends AbstractDubboFilter implements 
         Entry interfaceEntry = null;
         Entry methodEntry = null;
         try {
-            String resourceName = getResourceName(invoker, invocation);
-            interfaceEntry = SphU.entry(invoker.getInterface().getName(), EntryType.OUT);
-            methodEntry = SphU.entry(resourceName, EntryType.OUT);
+            String resourceName = getResourceName(invoker, invocation, DubboConfig.getDubboConsumerPrefix());
+            interfaceEntry = SphU.entry(invoker.getInterface().getName(), ResourceTypeConstants.COMMON_RPC,
+                EntryType.OUT);
+            methodEntry = SphU.entry(resourceName, ResourceTypeConstants.COMMON_RPC, EntryType.OUT);
 
             Result result = invoker.invoke(invocation);
             if (result.hasException()) {
+                Throwable e = result.getException();
                 // Record common exception.
-                Tracer.trace(result.getException());
+                Tracer.traceEntry(e, interfaceEntry);
+                Tracer.traceEntry(e, methodEntry);
             }
             return result;
         } catch (BlockException e) {
             return DubboFallbackRegistry.getConsumerFallback().handle(invoker, invocation, e);
         } catch (RpcException e) {
-            Tracer.trace(e);
+            Tracer.traceEntry(e, interfaceEntry);
+            Tracer.traceEntry(e, methodEntry);
             throw e;
         } finally {
             if (methodEntry != null) {

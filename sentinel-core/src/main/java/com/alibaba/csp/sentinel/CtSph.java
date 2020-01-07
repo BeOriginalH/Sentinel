@@ -72,7 +72,7 @@ public class CtSph implements Sph {
         }
         if (context == null) {
             // Using default context.
-            context = MyContextUtil.myEnter(Constants.CONTEXT_DEFAULT_NAME, "", resourceWrapper.getType());
+            context = InternalContextUtil.internalEnter(Constants.CONTEXT_DEFAULT_NAME);
         }
 
         // Global switch is turned off, so no rule checking will be done.
@@ -137,7 +137,7 @@ public class CtSph implements Sph {
         //如果不存在context，创建一个默认的context
         if (context == null) {
             // Using default context.
-            context = MyContextUtil.myEnter(Constants.CONTEXT_DEFAULT_NAME, "", resourceWrapper.getType());
+            context = InternalContextUtil.internalEnter(Constants.CONTEXT_DEFAULT_NAME);
         }
 
         // Global switch is close, no rule checking will do.
@@ -266,8 +266,12 @@ public class CtSph implements Sph {
     /**
      * This class is used for skip context name checking.
      */
-    private final static class MyContextUtil extends ContextUtil {
-        static Context myEnter(String name, String origin, EntryType type) {
+    private final static class InternalContextUtil extends ContextUtil {
+        static Context internalEnter(String name) {
+            return trueEnter(name, "");
+        }
+
+        static Context internalEnter(String name, String origin) {
             return trueEnter(name, origin);
         }
     }
@@ -349,5 +353,25 @@ public class CtSph implements Sph {
         throws BlockException {
         StringResourceWrapper resource = new StringResourceWrapper(name, type);
         return entryWithPriority(resource, count, prioritized, args);
+    }
+
+    @Override
+    public Entry entryWithType(String name, int resourceType, EntryType entryType, int count, Object[] args)
+        throws BlockException {
+        return entryWithType(name, resourceType, entryType, count, false, args);
+    }
+
+    @Override
+    public Entry entryWithType(String name, int resourceType, EntryType entryType, int count, boolean prioritized,
+                               Object[] args) throws BlockException {
+        StringResourceWrapper resource = new StringResourceWrapper(name, entryType, resourceType);
+        return entryWithPriority(resource, count, prioritized, args);
+    }
+
+    @Override
+    public AsyncEntry asyncEntryWithType(String name, int resourceType, EntryType entryType, int count,
+                                         boolean prioritized, Object[] args) throws BlockException {
+        StringResourceWrapper resource = new StringResourceWrapper(name, entryType, resourceType);
+        return asyncEntryWithPriorityInternal(resource, count, prioritized, args);
     }
 }
